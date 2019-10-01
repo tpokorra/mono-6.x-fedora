@@ -6,6 +6,6 @@
 
 +#define ARCH_MIN_MS_BLOCK_SIZE (64*1024)
 +#define ARCH_MIN_MS_BLOCK_SIZE_SHIFT   16
- #ifdef __linux__
- #define REDZONE_SIZE    0
- #elif defined(__APPLE__)
+ #if defined(__APPLE__)
+ #define REDZONE_SIZE	128
+ #else

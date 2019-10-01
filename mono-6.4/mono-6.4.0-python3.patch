@@ -18,31 +18,31 @@ diff -up mono-5.18.1.0/mono/mini/genmdesc.py.py3 mono-5.18.1.0/mono/mini/genmdes
 diff -up mono-5.18.1.0/mono/mini/Makefile.am.in.py3 mono-5.18.1.0/mono/mini/Makefile.am.in
 --- mono-5.18.1.0/mono/mini/Makefile.am.in.py3	2019-03-28 07:01:10.975851125 -0400
 +++ mono-5.18.1.0/mono/mini/Makefile.am.in	2019-03-28 07:01:35.395851125 -0400
-@@ -738,7 +738,7 @@ MemoryIntrinsics.dll: MemoryIntrinsics.i
+@@ -780,7 +780,7 @@ MemoryIntrinsics.dll: MemoryIntrinsics.i
  
  GENMDESC_OPTS=
  
 -GENMDESC_PRG=python $(srcdir)/genmdesc.py $(target_define) $(srcdir)
 +GENMDESC_PRG=python3 $(srcdir)/genmdesc.py $(target_define) $(srcdir)
  
- cpu-wasm.h: mini-ops.h cpu-wasm.md
+ cpu-wasm.h: mini-ops.h cpu-wasm.md $(srcdir)/genmdesc.py
  	$(GENMDESC_PRG) cpu-wasm.h wasm_desc $(srcdir)/cpu-wasm.md
 diff -up mono-5.18.1.0/mono/mini/Makefile.am.py3 mono-5.18.1.0/mono/mini/Makefile.am
 --- mono-5.18.1.0/mono/mini/Makefile.am.py3	2019-03-28 07:06:02.235851125 -0400
 +++ mono-5.18.1.0/mono/mini/Makefile.am	2019-03-28 07:06:06.385851125 -0400
-@@ -738,7 +738,7 @@ MemoryIntrinsics.dll: MemoryIntrinsics.i
+@@ -780,7 +780,7 @@ MemoryIntrinsics.dll: MemoryIntrinsics.i
  
  GENMDESC_OPTS=
  
 -GENMDESC_PRG=python $(srcdir)/genmdesc.py $(target_define) $(srcdir)
 +GENMDESC_PRG=python3 $(srcdir)/genmdesc.py $(target_define) $(srcdir)
  
- cpu-wasm.h: mini-ops.h cpu-wasm.md
+ cpu-wasm.h: mini-ops.h cpu-wasm.md $(srcdir)/genmdesc.py
  	$(GENMDESC_PRG) cpu-wasm.h wasm_desc $(srcdir)/cpu-wasm.md
 diff -up mono-5.18.1.0/mono/mini/Makefile.in.py3 mono-5.18.1.0/mono/mini/Makefile.in
 --- mono-5.18.1.0/mono/mini/Makefile.in.py3	2019-03-28 07:06:12.805851125 -0400
 +++ mono-5.18.1.0/mono/mini/Makefile.in	2019-03-28 07:06:21.575851125 -0400
-@@ -1175,7 +1175,7 @@ libmonoincludedir = $(includedir)/mono-$
+@@ -1276,7 +1276,7 @@ libmonoincludedir = $(includedir)/mono-$
  libmonoinclude_HEADERS = jit.h
  CSFLAGS = -unsafe -nowarn:0219,0169,0414,0649,0618
  GENMDESC_OPTS = 
