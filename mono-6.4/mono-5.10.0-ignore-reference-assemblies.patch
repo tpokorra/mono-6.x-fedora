@@ -1,0 +1,87 @@
+--- a/mcs/class/reference-assemblies/Makefile	2019-01-02 10:25:41.011999700 +0100
++++ b/mcs/class/reference-assemblies/Makefile	2019-01-02 10:27:20.591632515 +0100
+@@ -10,25 +10,11 @@
+ 	$(MAKE) -C ../../../external/binary-reference-assemblies CSC="MONO_PATH=$(abspath $(topdir)/class/lib/$(BUILD_TOOLS_PROFILE)) $(INTERNAL_CSC)"
+ 
+ install-local:
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/2.0-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/3.5-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.0-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.1-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.2-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6.1-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6.2-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.1-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.2-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6.1-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.6.2-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.1-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.2-api/Facades
++	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5
++	ln -sf 4.5 $(PROFILE_DIR)/4.7-api
++	ln -sf 4.5 $(PROFILE_DIR)/4.6-api
++	ln -sf 4.5 $(PROFILE_DIR)/4.5-api
++	ln -sf 4.5 $(PROFILE_DIR)/4.0-api
+ 
+ 	$(INSTALL_LIB) ../../../external/binary-reference-assemblies/v2.0/*.dll $(PROFILE_DIR)/2.0-api
+ 	$(INSTALL_LIB) ../../../external/binary-reference-assemblies/v3.5/*.dll $(PROFILE_DIR)/3.5-api
+@@ -67,13 +53,6 @@
+ 	$(INSTALL_LIB) ../../../external/binary-reference-assemblies/mono/*.dll $(PROFILE_DIR)/4.7.2-api
+ 	rm -f $(PROFILE_DIR)/4.7.2-api/ICSharpCode.SharpZipLib.dll
+ 
+-	# Unfortunately, a few programs (most notably NUnit and FSharp) have hardcoded checks for <prefix>/lib/mono/4.0/mscorlib.dll or Mono.Posix.dll,
+-	# so we need to place something there or those tools break. We decided to symlink to the reference assembly for now.
+-	# See https://bugzilla.xamarin.com/show_bug.cgi?id=38331 and https://bugzilla.xamarin.com/show_bug.cgi?id=41052
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.0
+-	ln -sf ../4.0-api/mscorlib.dll $(PROFILE_DIR)/4.0/mscorlib.dll
+-	ln -sf ../4.0-api/Mono.Posix.dll $(PROFILE_DIR)/4.0/Mono.Posix.dll
+-
+ DISTFILES =	\
+ 	$(wildcard ../../../external/binary-reference-assemblies/v4.7.2/Facades/*.dll)	\
+ 	$(wildcard ../../../external/binary-reference-assemblies/v4.7.1/Facades/*.dll)	\
+--- a/mcs/Makefile	2018-03-03 06:32:13.642690150 +0100
++++ b/mcs/Makefile	2018-03-03 06:32:54.699643624 +0100
+@@ -40,7 +40,7 @@
+ 
+ # fun specialty targets
+ 
+-PROFILES = net_4_x binary_reference_assemblies xbuild_12 xbuild_14
++PROFILES = net_4_x xbuild_12 xbuild_14
+ 
+ .PHONY: all-profiles $(STD_TARGETS:=-profiles)
+ all-profiles $(STD_TARGETS:=-profiles): %-profiles: profiles-do--%
+@@ -65,7 +65,6 @@
+ _boot_ = all clean install
+ $(_boot_:%=profile-do--xbuild_14--%):         profile-do--xbuild_14--%:         profile-do--net_4_x--%
+ $(_boot_:%=profile-do--xbuild_12--%):         profile-do--xbuild_12--%:         profile-do--net_4_x--%
+-$(_boot_:%=profile-do--binary_reference_assemblies--%):           profile-do--binary_reference_assemblies--%:           profile-do--build--%
+ $(_boot_:%=profile-do--net_4_x--%):           profile-do--net_4_x--%:           profile-do--build--%
+ $(_boot_:%=profile-do--monodroid--%):         profile-do--monodroid--%:         profile-do--build--%
+ $(_boot_:%=profile-do--monodroid_tools--%):         profile-do--monodroid_tools--%:         profile-do--build--%
+--- a/mcs/build/Makefile	2018-03-03 07:18:20.662959369 +0100
++++ b/mcs/build/Makefile	2018-03-03 07:18:33.303253408 +0100
+@@ -19,7 +19,6 @@
+ PROFILES = \
+ 	basic \
+ 	build \
+-	binary_reference_assemblies \
+ 	net_4_x \
+ 	xbuild_12 \
+ 	xbuild_14
+--- a/runtime/Makefile.in	2018-03-03 14:06:44.691631197 +0100
++++ b/runtime/Makefile.in	2018-03-03 14:07:07.241155116 +0100
+@@ -80,7 +80,7 @@
+ host_triplet = @host@
+ target_triplet = @target@
+ @INSTALL_4_x_TRUE@am__append_1 = etc/mono/4.0/machine.config etc/mono/4.0/web.config etc/mono/4.5/web.config etc/mono/4.0/Browsers/Compat.browser etc/mono/4.5/Browsers/Compat.browser
+-@INSTALL_4_x_TRUE@am__append_2 = binary_reference_assemblies net_4_x xbuild_12 xbuild_14
++@INSTALL_4_x_TRUE@am__append_2 = net_4_x xbuild_12 xbuild_14
+ @INSTALL_MONODROID_TRUE@am__append_3 = monodroid monodroid_tools
+ @INSTALL_MONOTOUCH_TRUE@am__append_4 = monotouch monotouch_runtime
+ @INSTALL_MONOTOUCH_WATCH_TRUE@am__append_5 = monotouch_watch monotouch_watch_runtime
