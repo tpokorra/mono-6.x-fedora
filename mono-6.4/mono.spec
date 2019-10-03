@@ -331,6 +331,15 @@ not install anything from outside the mono source (XSP, mono-basic, etc.).
 %patch8 -p1
 %patch9 -p1
 
+# don't build mono-helix-client which requires the helix-binaries to build
+sed -i 's|mono-helix-client||g' mcs/tools/Makefile
+
+# use v4.7.1 instead of v4.6
+sed -i 's|TARGET_NET_REFERENCE = v4.6|TARGET_NET_REFERENCE = $(BOOTSTRAP_BIN_PROFILE)|g' mcs/tools/upload-to-sentry/Makefile
+
+# use v4.7.1 instead of v4.7
+sed -i 's|BOOTSTRAP_BIN_PROFILE = v4.7|BOOTSTRAP_BIN_PROFILE = v4.7.1|g' mcs/build/profiles/build.make
+
 # Remove hardcoded lib directory for libMonoPosixHelper.so from the config
 sed -i 's|$mono_libdir/||g' data/config.in
 
