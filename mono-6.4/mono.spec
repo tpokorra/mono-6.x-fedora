@@ -43,7 +43,8 @@ Patch5:         mono-6.4.0-roslyn-binaries.patch
 Patch6:         mono-5.18.0-use-mcs.patch
 Patch7:         mono-5.18.0-reference-assemblies-fix.patch
 Patch8:         mono-5.18.0-sharpziplib-parent-path-traversal.patch
-Patch9:        mono-6.4.0-python3.patch
+Patch9:         mono-6.4.0-python3.patch
+Patch10:        mono-6.4.0-disable_get_monolite.patch
 
 BuildRequires:  bison
 BuildRequires:  python%{python3_pkgversion}
@@ -65,7 +66,7 @@ BuildRequires:  perl-Getopt-Long
 %if 0%{bootstrap}
 # for bootstrap, use bundled monolite and reference assemblies instead of local mono
 %else
-BuildRequires:  mono-core >= 5.0
+BuildRequires:  mono-core >= 6.0
 %endif
 
 # JIT only available on these:
@@ -330,6 +331,7 @@ not install anything from outside the mono source (XSP, mono-basic, etc.).
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
 
 # don't build mono-helix-client which requires the helix-binaries to build
 sed -i 's|mono-helix-client||g' mcs/tools/Makefile
@@ -347,6 +349,9 @@ sed -i 's|$mono_libdir/||g' data/config.in
 # for bootstrap, keep some binaries
 find . -name "*.dll" -not -path "./mcs/class/lib/monolite-linux/*" -not -path "./external/binary-reference-assemblies/v4.7.1/*" -print -delete
 find . -name "*.exe" -not -path "./mcs/class/lib/monolite-linux/*" -print -delete
+# add missing symbolic links to libmono-native.so and similar files
+#if [ ! -f mono/native/.libs/libmono-native.so ]; then exit -1; fi
+#for d in mcs/class/lib/monolite-linux/*; do cd $d; for f in ../../../../../mono/native/.libs/*; do ln -s $f; done; cd -; done
 %else
 # Remove all prebuilt binaries
 rm -rf mcs/class/lib/monolite-linux/*
@@ -472,7 +477,6 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_bindir}/mono-sgen
 %{_bindir}/mono-sgen-gdb.py
 %{_bindir}/mono-package-runtime
-%{_bindir}/monograph
 %{_bindir}/sgen-grep-binprot
 %dir %{_libdir}/mono
 %dir %{_libdir}/mono/lldb
