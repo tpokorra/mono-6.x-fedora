@@ -453,6 +453,7 @@ rm -rf %{buildroot}/usr/lib/mono/msbuild
 rm -rf %{buildroot}/usr/lib/debug/usr/lib64/libmono-btls-shared.so-*.debug
 # drop other debug files as well
 rm -rf %{buildroot}/usr/lib/debug/usr/lib64/libmono-native.so*.debug
+rm -rf %{buildroot}/usr/lib/debug/usr/bin/mono-hang-watchdog-*.debug
 
 %find_lang mcs
 
@@ -597,6 +598,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %gac_dll System.Workflow.ComponentModel
 %gac_dll System.Workflow.Runtime
 %gac_dll Mono.Profiler.Log
+%{_bindir}/mono-hang-watchdog
 
 %files devel
 %{_sysconfdir}/pki/mono/
@@ -715,6 +717,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_includedir}/mono-2.0/mono/metadata/*.h
 %{_includedir}/mono-2.0/mono/utils/*.h
 %{_includedir}/mono-2.0/mono/cil/opcode.def
+%{_bindir}/aprofutil
+%mono_bin aprofutil
+%{_mandir}/man1/aprofutil.1.gz
 
 %files locale-extras
 %gac_dll I18N.CJK
@@ -872,6 +877,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_prefix}/lib/monodoc
 %endif
 %{_bindir}/mod
+%{_bindir}/mdoc
 %{_bindir}/mdoc-*
 %{_bindir}/mdass*
 %{_bindir}/mdval*
