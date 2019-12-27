@@ -2,7 +2,7 @@
 # workaround https://github.com/mono/mono/issues/9009#issuecomment-477073609
 %undefine _hardened_build
 %endif
-%global bootstrap 1
+%global bootstrap 0
 %if 0%{?el6}
 # see https://fedorahosted.org/fpc/ticket/395, it was added to el7
 %global mono_arches %{ix86} x86_64 sparc sparcv9 ia64 %{arm} alpha s390x ppc ppc64 ppc64le
@@ -23,7 +23,7 @@
 %global xamarinrelease 161
 Name:           mono
 Version:        6.6.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -892,6 +892,10 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+
+* Fri Dec 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-2
+- disable bootstrapping
+
 * Fri Dec 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-1
 - upgrade to Mono 6.6.0.161
 
