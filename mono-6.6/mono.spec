@@ -871,7 +871,6 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %ifnarch  ppc
 %{_prefix}/lib/monodoc
 %endif
-%mono_bin mdoc
 %{_bindir}/mod
 %{_bindir}/mdoc-*
 %{_bindir}/mdass*
