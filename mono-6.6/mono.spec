@@ -20,9 +20,9 @@
 %undefine _missing_build_ids_terminate_build
 %endif
 
-%global xamarinrelease 198
+%global xamarinrelease 161
 Name:           mono
-Version:        6.4.0
+Version:        6.6.0
 Release:        1%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
@@ -349,9 +349,6 @@ sed -i 's|$mono_libdir/||g' data/config.in
 # for bootstrap, keep some binaries
 find . -name "*.dll" -not -path "./mcs/class/lib/monolite-linux/*" -not -path "./external/binary-reference-assemblies/v4.7.1/*" -print -delete
 find . -name "*.exe" -not -path "./mcs/class/lib/monolite-linux/*" -print -delete
-# add missing symbolic links to libmono-native.so and similar files
-#if [ ! -f mono/native/.libs/libmono-native.so ]; then exit -1; fi
-#for d in mcs/class/lib/monolite-linux/*; do cd $d; for f in ../../../../../mono/native/.libs/*; do ln -s $f; done; cd -; done
 %else
 # Remove all prebuilt binaries
 rm -rf mcs/class/lib/monolite-linux/*
@@ -376,6 +373,7 @@ export CFLAGS="$RPM_OPT_FLAGS -fno-strict-aliasing"
 sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
 sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
 
+export LD_LIBRARY_PATH=`pwd`/mono/native/.libs
 make %{?_smp_mflags}
 
 # rebuild the reference assemblies
@@ -384,6 +382,7 @@ find ./external/binary-reference-assemblies/v4.7.1/ -name \*.dll -print -delete
 BUILD_PATH=`pwd` && cd ./external/binary-reference-assemblies/ && MONO_PATH=$BUILD_PATH/mcs/class/lib/net_4_x-linux/ V=1 CSC="$BUILD_PATH/runtime/mono-wrapper $BUILD_PATH/mcs/class/lib/net_4_x-linux/mcs.exe" make -C v4.7.1
 
 %install
+export LD_LIBRARY_PATH=`pwd`/mono/native/.libs
 make install DESTDIR=%{buildroot}
 
 # copy the mono.snk key into /etc/pki/mono
@@ -888,6 +887,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Fri Dec 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-1
+- upgrade to Mono 6.6.0.161
+
 * Tue Oct 01 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.4.0-1
 - upgrade to Mono 6.4.0.198
 

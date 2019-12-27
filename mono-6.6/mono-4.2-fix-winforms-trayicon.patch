@@ -11,9 +11,9 @@ diff --git a/mcs/class/System.Windows.Forms/System.Windows.Forms/XplatUIX11.cs b
 index b0777b5..d50d6c4 100644
 --- a/mcs/class/System.Windows.Forms/System.Windows.Forms/XplatUIX11.cs
 +++ b/mcs/class/System.Windows.Forms/System.Windows.Forms/XplatUIX11.cs
-@@ -6239,9 +6239,6 @@ namespace System.Windows.Forms {
- 				atoms [0] = 1;			// Version 1
- 				atoms [1] = 1;			// we want to be mapped
+@@ -6219,9 +6219,6 @@ namespace System.Windows.Forms {
+ 				atoms [0] = (IntPtr)1;			// Version 1
+ 				atoms [1] = (IntPtr)1;			// we want to be mapped
  
 -				// This line cost me 3 days...
 -				XChangeProperty(DisplayHandle, hwnd.whole_window, _XEMBED_INFO, _XEMBED_INFO, 32, PropertyMode.Replace, atoms, 2);

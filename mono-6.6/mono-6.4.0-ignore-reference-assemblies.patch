@@ -1,6 +1,6 @@
 --- a/mcs/class/reference-assemblies/Makefile	2019-01-02 10:25:41.011999700 +0100
 +++ b/mcs/class/reference-assemblies/Makefile	2019-01-02 10:27:20.591632515 +0100
-@@ -10,27 +10,11 @@
+@@ -10,29 +10,11 @@
  	$(MAKE) -C ../../../external/binary-reference-assemblies CSC="MONO_PATH=$(abspath $(topdir)/class/lib/$(BUILD_TOOLS_PROFILE)) $(INTERNAL_CSC)"
  
  install-local:
@@ -16,6 +16,7 @@
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7-api
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.1-api
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.2-api
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.8-api
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5-api/Facades
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.1-api/Facades
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5.2-api/Facades
@@ -25,6 +26,7 @@
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7-api/Facades
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.1-api/Facades
 -	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.7.2-api/Facades
+-	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.8-api/Facades
 +	$(MKINSTALLDIRS) $(PROFILE_DIR)/4.5
 +	ln -sf 4.5 $(PROFILE_DIR)/4.7-api
 +	ln -sf 4.5 $(PROFILE_DIR)/4.6-api
