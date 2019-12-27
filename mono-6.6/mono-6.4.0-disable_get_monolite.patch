@@ -1,0 +1,11 @@
+--- a/mcs/class/Makefile	2019-07-09 20:43:27.353113015 +0000
++++ b/mcs/class/Makefile	2019-07-09 20:43:43.833390311 +0000
+@@ -523,7 +523,7 @@
+ get-monolite-latest:
+ 	-rm -fr lib/monolite-$(BUILD_PLATFORM)/$(MONO_CORLIB_VERSION)
+ 	-mkdir -p lib/monolite-$(BUILD_PLATFORM)
+-	cd lib && { (wget -O- $(monolite_url) || curl -L $(monolite_url)) | gzip -d | tar xf - ; }
++	cd lib && { (wget_off -O- $(monolite_url) || curl_off -L $(monolite_url)) | gzip -d | tar xf - ; }
+ 	cd lib && mv -f monolite-$(BUILD_PLATFORM)-$(MONO_CORLIB_VERSION)-latest monolite-$(BUILD_PLATFORM)/$(MONO_CORLIB_VERSION)
+ 
+ dist-default: dist-monolite-all-platforms
