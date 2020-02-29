@@ -23,7 +23,7 @@
 %global xamarinrelease 161
 Name:           mono
 Version:        6.6.0
-Release:        2%{?dist}
+Release:        5%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -34,17 +34,28 @@ Source0:        http://download.mono-project.com/sources/mono/mono-%{version}.%{
 # sn -k mono.snk
 # You should not regenerate this unless you have a really, really, really good reason.
 Source1:        mono.snk
-Patch0:         mono-6.4.0-ignore-reference-assemblies.patch
+# These scripts were taken from rpm-build in Fedora 30
+# They're significantly different from what is included in the mono sources.
+Source2:        mono-find-provides
+Source3:        mono-find-requires
+Source4:        mono.attr
+Patch0:         mono-6.6.0-ignore-reference-assemblies.patch
 Patch1:         mono-4.2.1-ppc.patch
 Patch2:         mono-5.10.0-find-provides.patch
 Patch3:         mono-4.2-fix-winforms-trayicon.patch
-Patch4:         mono-6.4.0-aarch64.patch
-Patch5:         mono-6.4.0-roslyn-binaries.patch
+Patch4:         mono-6.6.0-aarch64.patch
+Patch5:         mono-6.6.0-roslyn-binaries.patch
 Patch6:         mono-5.18.0-use-mcs.patch
 Patch7:         mono-5.18.0-reference-assemblies-fix.patch
 Patch8:         mono-5.18.0-sharpziplib-parent-path-traversal.patch
-Patch9:         mono-6.4.0-python3.patch
-Patch10:        mono-6.4.0-disable_get_monolite.patch
+Patch9:         mono-6.6.0-python3.patch
+# Fix NRE bug in api-doc-tools: https://github.com/mono/api-doc-tools/pull/464
+Patch10:        0001-DocumentationEnumerator.cs-Declare-iface-and-ifaceMe.patch
+# Replace new Csharp features with old to allow mdoc to build
+# https://github.com/mono/api-doc-tools/pull/463
+Patch11:        0001-Replace-new-Csharp-features-with-old-ones.patch
+# Reenable mdoc build. To be upstreamed after Patch 10 and 11
+Patch12:        0001-Reenable-mdoc.exe-build.patch
 
 BuildRequires:  bison
 BuildRequires:  python%{python3_pkgversion}
@@ -66,14 +77,15 @@ BuildRequires:  perl-Getopt-Long
 %if 0%{bootstrap}
 # for bootstrap, use bundled monolite and reference assemblies instead of local mono
 %else
-BuildRequires:  mono-core >= 6.0
+BuildRequires:  mono-core >= 6.6
+BuildRequires:  mono-devel >= 6.6
 %endif
 
 # JIT only available on these:
 ExclusiveArch: %mono_arches
 
 %global _use_internal_dependency_generator 0
-%global __find_provides env sh -c 'filelist=($(cat)) && { printf "%s\\n" "${filelist[@]}" | /usr/lib/rpm/redhat/find-provides && printf "%s\\n" "${filelist[@]}" | prefix=%{buildroot}%{_prefix} %{buildroot}%{_bindir}/mono-find-provides; } | sort | uniq'
+%global __find_provides env sh -c 'filelist=($(cat)) && { printf "%s\\n" "${filelist[@]}" | grep -v 4.7.1-api | grep -v 4.5-api| /usr/lib/rpm/redhat/find-provides && printf "%s\\n" "${filelist[@]}" | grep -v 4.7.1-api | grep -v 4.5-api | prefix=%{buildroot}%{_prefix} %{buildroot}%{_bindir}/mono-find-provides; } | sort | uniq'
 %global __find_requires env sh -c 'filelist=($(cat)) && { printf "%s\\n" "${filelist[@]}" | /usr/lib/rpm/redhat/find-requires && printf "%s\\n" "${filelist[@]}" | prefix=%{buildroot}%{_prefix} %{buildroot}%{_bindir}/mono-find-requires; } | sort | uniq | grep ^...'
 
 %description
@@ -331,7 +343,11 @@ not install anything from outside the mono source (XSP, mono-basic, etc.).
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+pushd external/api-doc-tools
 %patch10 -p1
+%patch11 -p1
+popd
+%patch12 -p1
 
 # don't build mono-helix-client which requires the helix-binaries to build
 sed -i 's|mono-helix-client||g' mcs/tools/Makefile
@@ -451,13 +467,24 @@ rm -rf %{buildroot}/usr/lib/mono/msbuild
 
 # we have btls debug files
 rm -rf %{buildroot}/usr/lib/debug/usr/lib64/libmono-btls-shared.so-*.debug
+
 # drop other debug files as well
 rm -rf %{buildroot}/usr/lib/debug/usr/lib64/libmono-native.so*.debug
 rm -rf %{buildroot}/usr/lib/debug/usr/bin/mono-hang-watchdog-*.debug
 
+# create a symbolic link so that Fedora packages targetting Framework 4.5 will still build
+cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.5-api && cd -
+# as requested in bug 1704861; we have had that link in F29 with Mono 4.8 as well.
+cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.0-api && cd -
+
+# rpm helper scripts
+mkdir -p %{buildroot}%{_prefix}/lib/rpm/fileattrs/
+install -p -m755 %{SOURCE2} %{SOURCE3} %{buildroot}%{_prefix}/lib/rpm/
+install -p -m644 %{SOURCE4} %{buildroot}%{_prefix}/lib/rpm/fileattrs/
+
 %find_lang mcs
 
-%post
+%post core
 %{?ldconfig}
 cert-sync /etc/pki/tls/certs/ca-bundle.crt
 
@@ -692,6 +719,8 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %gac_dll System.Windows
 %gac_dll System.Xml.Serialization
 %{_monodir}/4.7.1-api/
+%{_monodir}/4.5-api
+%{_monodir}/4.0-api
 %{_monodir}/4.5/Microsoft.Common.tasks
 %{_monodir}/4.5/MSBuild/Microsoft.Build*
 %{_monodir}/4.5/Microsoft.Build.xsd
@@ -717,6 +746,8 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_includedir}/mono-2.0/mono/metadata/*.h
 %{_includedir}/mono-2.0/mono/utils/*.h
 %{_includedir}/mono-2.0/mono/cil/opcode.def
+%{_prefix}/lib/rpm/mono-find-*
+%{_prefix}/lib/rpm/fileattrs/mono.attr
 %{_bindir}/aprofutil
 %mono_bin aprofutil
 %{_mandir}/man1/aprofutil.1.gz
@@ -876,6 +907,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %ifnarch  ppc
 %{_prefix}/lib/monodoc
 %endif
+%mono_bin mdoc
 %{_bindir}/mod
 %{_bindir}/mdoc
 %{_bindir}/mdoc-*
@@ -892,21 +924,53 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Mon Feb 03 2020 Robert-André Mauchin <zebob.m@gmail.com> - 6.6.0-5
+- Reenable mdoc build (#1797360)
 
-* Fri Dec 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-2
-- disable bootstrapping
+* Mon Feb 03 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-4
+- drop more bash scripts for mdoc, because mdoc does not build with mcs anymore
 
-* Fri Dec 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-1
-- upgrade to Mono 6.6.0.161
+* Mon Feb 03 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-3
+- drop bash script for mdoc, because mdoc does not build with mcs anymore
 
-* Tue Oct 01 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.4.0-1
-- upgrade to Mono 6.4.0.198
+* Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 6.6.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
-* Wed Jul 17 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.20.1-2
-- upgrade to Mono 5.20.1.34
+* Mon Jan 20 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-1
+- build again without bootstrap
 
-* Fri Apr 26 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.20.1-1
-- upgrade to Mono 5.20.1.27
+* Sat Jan 18 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-0
+- upgrade to Mono 6.6.0.161, with a bootstrap build
+
+* Sun Oct 13 2019 Peter Oliver <rpm@mavit.org.uk> - 5.20.1-1
+- Post script must belong to a subpackage, since there is no main package.
+
+* Wed Aug 07 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.20.1-1
+- build again without bootstrap
+
+* Tue Aug 06 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.20.1-0
+- upgrade to Mono 5.20.1.34, with a bootstrap build
+
+* Tue Jul 30 2019 Tom Callaway <spot@fedoraproject.org> - 5.18.1-10
+- add rpm helper scripts (formerly in rpm-build)
+
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 5.18.1-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
+* Wed Jul 17 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-8
+- upgrade to Mono 5.18.1.28
+
+* Tue May 14 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-7
+- adding link 4.0-api, fixes bug 1704861
+
+* Wed May 01 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-6
+- backport a fix for LargeArrayBuilder, fixes bug 1704847
+
+* Wed May 01 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-5
+- mono-devel should not provide for namespaces in the reference assemblies. fixes bug 1704560
+
+* Sat Apr 27 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-4
+- add symbolic link from /usr/lib/mono/4.5-api to 4.7.1-api to fix build issues for other packages depending on Mono
 
 * Thu Apr 18 2019 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 5.18.1-3
 - upgrade to Mono 5.18.1.3
