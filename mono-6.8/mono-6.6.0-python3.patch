@@ -50,4 +50,4 @@ diff -up mono-5.18.1.0/mono/mini/Makefile.in.py3 mono-5.18.1.0/mono/mini/Makefil
 +GENMDESC_PRG = python3 $(srcdir)/genmdesc.py $(target_define) $(srcdir)
  LLVM_AOT_RUNTIME_OPTS = $(if $(LLVM),--llvm,)
  @AMD64_FALSE@LLVM_AOT_COMPILER_OPTS = 
- @AMD64_TRUE@LLVM_AOT_COMPILER_OPTS = $(if $(LLVM),"=llvmllc=-mcpu=generic -mattr=+sse3",)
+ @AMD64_TRUE@LLVM_AOT_COMPILER_OPTS = $(if $(LLVM),llvmllc=-mattr=+sse3,)
