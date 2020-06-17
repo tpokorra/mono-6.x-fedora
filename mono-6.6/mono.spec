@@ -2,7 +2,7 @@
 # workaround https://github.com/mono/mono/issues/9009#issuecomment-477073609
 %undefine _hardened_build
 %endif
-%global bootstrap 0
+%global bootstrap 1
 %if 0%{?el6}
 # see https://fedorahosted.org/fpc/ticket/395, it was added to el7
 %global mono_arches %{ix86} x86_64 sparc sparcv9 ia64 %{arm} alpha s390x ppc ppc64 ppc64le
@@ -23,7 +23,7 @@
 %global xamarinrelease 166
 Name:           mono
 Version:        6.6.0
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -656,8 +656,13 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %mono_bin mkbundle
 %mono_bin makecert
 %mono_bin mono-cil-strip
+
+# for Epel7, we don't deliver these two files, they are still provided by rpm-build-4.11.3-43.el7.x86_64
+%if 0%{?el7} == 0
 %{_bindir}/mono-find-provides
 %{_bindir}/mono-find-requires
+%endif
+
 %{_bindir}/monodis
 %mono_bin monolinker
 %mono_bin mono-shlib-cop
@@ -924,6 +929,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Wed Jun 17 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-7
+- fix for epel7, don't deliver mono-find-provides or mono-find-requires since they are still part of rpm-build
+
 * Wed Jun 17 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-6
 - new upstream Mono 6.6.0.166
 
