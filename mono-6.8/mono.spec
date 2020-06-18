@@ -477,10 +477,13 @@ cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.5-api && cd -
 # as requested in bug 1704861; we have had that link in F29 with Mono 4.8 as well.
 cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.0-api && cd -
 
+# for Epel7, we don't deliver these files, they are still provided by rpm-build-4.11.3-43.el7.x86_64
+%if 0%{?el7} == 0
 # rpm helper scripts
 mkdir -p %{buildroot}%{_prefix}/lib/rpm/fileattrs/
 install -p -m755 %{SOURCE2} %{SOURCE3} %{buildroot}%{_prefix}/lib/rpm/
 install -p -m644 %{SOURCE4} %{buildroot}%{_prefix}/lib/rpm/fileattrs/
+%endif
 
 %find_lang mcs
 
@@ -659,7 +662,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_bindir}/mono-find-provides
 %{_bindir}/mono-find-requires
 %{_bindir}/monodis
-%mono_bin monolinker
+%{_bindir}/monolinker
 %mono_bin mono-shlib-cop
 %mono_bin mono-xmltool
 %mono_bin monop
@@ -746,8 +749,13 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_includedir}/mono-2.0/mono/metadata/*.h
 %{_includedir}/mono-2.0/mono/utils/*.h
 %{_includedir}/mono-2.0/mono/cil/opcode.def
+
+# for Epel7, we don't deliver these files, they are still provided by rpm-build-4.11.3-43.el7.x86_64
+%if 0%{?el7} == 0
 %{_prefix}/lib/rpm/mono-find-*
 %{_prefix}/lib/rpm/fileattrs/mono.attr
+%endif
+
 %{_bindir}/aprofutil
 %mono_bin aprofutil
 %{_mandir}/man1/aprofutil.1.gz
