@@ -478,7 +478,7 @@ cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.5-api && cd -
 cd %{buildroot}/usr/lib/mono && ln -s 4.7.1-api 4.0-api && cd -
 
 # for Epel7, we don't deliver these files, they are still provided by rpm-build-4.11.3-43.el7.x86_64
-%if 0%{?el7} == 0
+%if 0%{?el7}%{?el8} == 0
 # rpm helper scripts
 mkdir -p %{buildroot}%{_prefix}/lib/rpm/fileattrs/
 install -p -m755 %{SOURCE2} %{SOURCE3} %{buildroot}%{_prefix}/lib/rpm/
@@ -751,7 +751,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_includedir}/mono-2.0/mono/cil/opcode.def
 
 # for Epel7, we don't deliver these files, they are still provided by rpm-build-4.11.3-43.el7.x86_64
-%if 0%{?el7} == 0
+%if 0%{?el7}%{?el8} == 0
 %{_prefix}/lib/rpm/mono-find-*
 %{_prefix}/lib/rpm/fileattrs/mono.attr
 %endif
