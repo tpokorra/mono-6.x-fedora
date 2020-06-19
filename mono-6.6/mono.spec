@@ -2,7 +2,7 @@
 # workaround https://github.com/mono/mono/issues/9009#issuecomment-477073609
 %undefine _hardened_build
 %endif
-%global bootstrap 1
+%global bootstrap 0
 %if 0%{?el6}
 # see https://fedorahosted.org/fpc/ticket/395, it was added to el7
 %global mono_arches %{ix86} x86_64 sparc sparcv9 ia64 %{arm} alpha s390x ppc ppc64 ppc64le
@@ -23,7 +23,7 @@
 %global xamarinrelease 166
 Name:           mono
 Version:        6.6.0
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -932,6 +932,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Fri Jun 19 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-8
+- build again without bootstrap
+
 * Wed Jun 17 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-7
 - fix for epel7, don't deliver mono-find-provides or mono-find-requires since they are still part of rpm-build
 
