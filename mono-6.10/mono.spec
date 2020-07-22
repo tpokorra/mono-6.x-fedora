@@ -1,3 +1,4 @@
+%global _with_bootstrap 1
 %bcond_with bootstrap
 
 %ifarch s390x
@@ -21,10 +22,10 @@
 %undefine _missing_build_ids_terminate_build
 %endif
 
-%global xamarinrelease 123
+%global xamarinrelease 104
 Name:           mono
-Version:        6.8.0
-Release:        3%{?dist}
+Version:        6.10.0
+Release:        0%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -49,7 +50,6 @@ Patch5:         mono-6.6.0-roslyn-binaries.patch
 Patch6:         mono-5.18.0-use-mcs.patch
 Patch7:         mono-5.18.0-reference-assemblies-fix.patch
 Patch8:         mono-5.18.0-sharpziplib-parent-path-traversal.patch
-Patch9:         mono-6.6.0-python3.patch
 # Fix NRE bug in api-doc-tools: https://github.com/mono/api-doc-tools/pull/464
 Patch10:        0001-DocumentationEnumerator.cs-Declare-iface-and-ifaceMe.patch
 # Replace new Csharp features with old to allow mdoc to build
@@ -341,7 +341,6 @@ not install anything from outside the mono source (XSP, mono-basic, etc.).
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
-%patch9 -p1
 pushd external/api-doc-tools
 %patch10 -p1
 %patch11 -p1
@@ -931,6 +930,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Wed Jul 22 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.10.0-0
+- Bootstrap build for Mono 6.10
+
 * Sat Jul 18 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.8.0-3
 - Non-Bootstrap build of Mono 6.8 for Epel 8
 
