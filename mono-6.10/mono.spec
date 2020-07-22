@@ -1,8 +1,9 @@
+%bcond_with bootstrap
+
 %ifarch s390x
 # workaround https://github.com/mono/mono/issues/9009#issuecomment-477073609
 %undefine _hardened_build
 %endif
-%global bootstrap 0
 %if 0%{?el6}
 # see https://fedorahosted.org/fpc/ticket/395, it was added to el7
 %global mono_arches %{ix86} x86_64 sparc sparcv9 ia64 %{arm} alpha s390x ppc ppc64 ppc64le
@@ -15,7 +16,7 @@
 %global _monogacdir %{_monodir}/gac
 %endif
 
-%if 0%{?rhel}%{?el6}%{?el7} || 0%{?bootstrap}
+%if 0%{?rhel}%{?el6}%{?el7} || %{with bootstrap}
 # to resolve: "ERROR: No build ID note found"
 %undefine _missing_build_ids_terminate_build
 %endif
@@ -23,7 +24,7 @@
 %global xamarinrelease 123
 Name:           mono
 Version:        6.8.0
-Release:        1%{?dist}
+Release:        3%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
 License:        MIT
@@ -71,14 +72,12 @@ BuildRequires:  perl-Getopt-Long
 
 # Yes, mono actually depends on itself, because
 # we deleted the bootstrapping binaries. If you
-# need to bootstrap mono, comment out this BuildRequires
-# and don't delete the binaries in %%prep.
+# need to bootstrap mono, set _with_bootstrap at the top
+# which results in not deleting the binaries in %%prep.
 
-%if 0%{bootstrap}
-# for bootstrap, use bundled monolite and reference assemblies instead of local mono
-%else
-BuildRequires:  mono-core >= 6.6
-BuildRequires:  mono-devel >= 6.6
+%if %{without bootstrap}
+BuildRequires:  mono-core >= 6.8
+BuildRequires:  mono-devel >= 6.8
 %endif
 
 # JIT only available on these:
@@ -361,7 +360,7 @@ sed -i 's|BOOTSTRAP_BIN_PROFILE = v4.7|BOOTSTRAP_BIN_PROFILE = v4.7.1|g' mcs/bui
 # Remove hardcoded lib directory for libMonoPosixHelper.so from the config
 sed -i 's|$mono_libdir/||g' data/config.in
 
-%if 0%{bootstrap}
+%if %{with bootstrap}
 # for bootstrap, keep some binaries
 find . -name "*.dll" -not -path "./mcs/class/lib/monolite-linux/*" -not -path "./external/binary-reference-assemblies/v4.7.1/*" -print -delete
 find . -name "*.exe" -not -path "./mcs/class/lib/monolite-linux/*" -print -delete
@@ -446,9 +445,11 @@ rm -f %{buildroot}%{_libdir}/pkgconfig/mono-nunit.pc
 # remove dmcs because it requires the .net 4.0 sdk but we only deliver 4.5 with Fedora (#1294967)
 rm -f %{buildroot}%{_bindir}/dmcs
 
-# remove csc
+# remove wrapper scripts for roslyn-binaries
 rm -f %{buildroot}%{_bindir}/csc
 rm -f %{buildroot}%{_bindir}/csc-dim
+rm -f %{buildroot}%{_bindir}/csi
+rm -f %{buildroot}%{_bindir}/vbc
 
 # drop prj2make because the binary is not built anymore
 rm -f %{buildroot}%{_bindir}/prj2make
@@ -518,11 +519,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %mono_bin ikdasm
 %mono_bin lc
 %{_bindir}/gacutil2
-%{_bindir}/csi
 %{_bindir}/mcs
 %{_monodir}/4.5/mcs.*
 %{_monodir}/4.5/mono-api-diff.*
-%{_bindir}/vbc
 %mono_bin mozroots
 %mono_bin pdb2mdb
 %mono_bin setreg
@@ -932,11 +931,23 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
-* Fri Jun 19 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.8.0-1
-- build again without bootstrap
+* Sat Jul 18 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.8.0-3
+- Non-Bootstrap build of Mono 6.8 for Epel 8
 
-* Wed Jun 17 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.8.0-0
-- upgrade to Mono 6.8.0.123, with a bootstrap build
+* Fri Jul 17 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.8.0-2
+- Bootstrap build for Mono 6.8 for Epel 8
+
+* Thu Jul 16 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-9
+- Upgrade to Mono 6.6.0.166
+
+* Sat Apr 25 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-8
+- Non-bootstrap build for Epel 8
+
+* Sat Apr 25 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-7
+- another bootstrap build for Epel 8, but this time without the mono-find-provides and mono-find-requires scripts since they are still provided by rpm-build in Epel8
+
+* Sat Feb 29 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.6.0-6
+- Bootstrap build for Epel 8
 
 * Mon Feb 03 2020 Robert-André Mauchin <zebob.m@gmail.com> - 6.6.0-5
 - Reenable mdoc build (#1797360)
