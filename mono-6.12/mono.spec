@@ -22,9 +22,9 @@
 %undefine _missing_build_ids_terminate_build
 %endif
 
-%global xamarinrelease 104
+%global xamarinrelease 90
 Name:           mono
-Version:        6.10.0
+Version:        6.12.0
 Release:        0%{?dist}
 Summary:        Cross-platform, Open Source, .NET development framework
 
@@ -936,6 +936,9 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %files complete
 
 %changelog
+* Tue Oct 06 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.12.0-0
+- Bootstrap build for Mono 6.12
+
 * Wed Jul 22 2020 Timotheus Pokorra <timotheus.pokorra@solidcharity.com> - 6.10.0-0
 - Bootstrap build for Mono 6.10
 
