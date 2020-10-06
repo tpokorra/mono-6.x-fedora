@@ -76,8 +76,8 @@ BuildRequires:  perl-Getopt-Long
 # which results in not deleting the binaries in %%prep.
 
 %if %{without bootstrap}
-BuildRequires:  mono-core >= 6.8
-BuildRequires:  mono-devel >= 6.8
+BuildRequires:  mono-core >= 6.10
+BuildRequires:  mono-devel >= 6.10
 %endif
 
 # JIT only available on these:
@@ -96,7 +96,7 @@ metadata access libraries.
 %package core
 Summary:        The Mono CIL runtime, suitable for running .NET code
 Requires:       libgdiplus
-#dependency requiered for install
+#dependency required for install
 Provides:       mono(System.Collections.Immutable) = 1.2.0.0
 Provides:       mono(System.Diagnostics.StackTrace) = 4.0.2.0
 Provides:       mono(System.IO) = 4.0.10.0
@@ -373,6 +373,11 @@ cd external/binary-reference-assemblies && mv v4.7.1 v4.7.1.tobuild && ln -s /us
 %endif
 
 %build
+# This package fails to build with LTO on ppc64le.  Root cause analysis has not been
+# done.  For now disable LTO
+%ifarch ppc64le
+%define _lto_cflags %{nil}
+%endif
 %ifarch s390x
 # either mono C code relies on undefined behaviour or gcc is even more broken than earlier
 RPM_OPT_FLAGS=$(echo $RPM_OPT_FLAGS | sed -e 's/-O2 /-O1 /g')
@@ -412,7 +417,7 @@ cp external/binary-reference-assemblies/v4.7.1/*.dll %{buildroot}%{_monodir}/4.7
 rm -f %{buildroot}%{_libdir}/*.la
 # remove Windows-only stuff
 rm -rf %{buildroot}%{_monodir}/*/Mono.Security.Win32*
-rm -f %{buildroot}%{_libdir}/libMonoSupportW.*
+#rm -f %{buildroot}%{_libdir}/libMonoSupportW.*
 # remove .a files for libraries that are really only for us
 rm %{buildroot}%{_libdir}/*.a
 # remove libgc cruft
@@ -541,6 +546,7 @@ cert-sync /etc/pki/tls/certs/ca-bundle.crt
 %{_mandir}/man1/lc.1.gz
 %{_mandir}/man1/mprof-report.1.gz
 %{_libdir}/libMonoPosixHelper.so*
+%{_libdir}/libMonoSupportW.so*
 %{_libdir}/libmono-native.so*
 %dir %{_monodir}
 %dir %{_monodir}/4.5
